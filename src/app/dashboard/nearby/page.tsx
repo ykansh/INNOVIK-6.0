@@ -4,6 +4,17 @@ import { motion } from "framer-motion";
 import { ArrowLeft, MapPin, Search, Zap, Droplets, Trash2, ArrowRight, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import dynamic from "next/dynamic";
+
+const DynamicMap = dynamic(() => import("@/components/MapComponent"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full bg-[#e5e5e3] flex flex-col items-center justify-center">
+      <div className="w-8 h-8 border-4 border-[#16A34A] border-t-transparent rounded-full animate-spin mb-4"></div>
+      <p className="text-[#66706A] font-medium animate-pulse">Loading Live Map...</p>
+    </div>
+  ),
+});
 
 const categories = [
   { name: "All", color: "bg-gray-100 text-[#171918]" },
@@ -160,96 +171,13 @@ export default function NearbyIssues() {
           </div>
         </div>
 
-        {/* Mock Map Area */}
-        <div className="flex-1 bg-[#e5e5e3] relative overflow-hidden h-[60vh] md:h-auto">
-          {/* Decorative Map Pattern (Roads/Grid) */}
-          <div className="absolute inset-0 opacity-20" 
-               style={{ 
-                 backgroundImage: 'radial-gradient(#66706A 1px, transparent 1px)', 
-                 backgroundSize: '24px 24px' 
-               }}>
-          </div>
-          <div className="absolute top-1/4 left-0 right-0 h-4 bg-white/40 rotate-12 transform origin-left"></div>
-          <div className="absolute top-1/2 left-0 right-0 h-6 bg-white/40 -rotate-6 transform origin-left"></div>
-          <div className="absolute top-0 bottom-0 left-1/3 w-8 bg-white/40 transform -skew-x-12"></div>
-          
-          <div className="absolute inset-0 p-4 pointer-events-none">
-            <div className="bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-lg inline-block shadow-sm pointer-events-auto text-xs font-bold text-[#66706A]">
-              Mock Location Data
-            </div>
-          </div>
-
-          {/* Markers */}
-          {filteredMarkers.map((marker) => {
-            const Icon = marker.icon;
-            const isSelected = selectedMarker?.id === marker.id;
-            
-            return (
-              <div 
-                key={marker.id}
-                className="absolute transform -translate-x-1/2 -translate-y-full cursor-pointer group"
-                style={{ left: `${marker.x}%`, top: `${marker.y}%` }}
-                onClick={() => setSelectedMarker(marker)}
-              >
-                {/* Marker Tooltip on Hover (if not selected) */}
-                {!isSelected && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs font-bold rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
-                    {marker.issue}
-                  </div>
-                )}
-                
-                {/* Marker Pin */}
-                <div className="relative">
-                  {marker.pulse && (
-                    <div className="absolute inset-0 rounded-full animate-ping opacity-75 bg-current text-red-500"></div>
-                  )}
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md relative z-10 transition-transform ${marker.colorClass} ${isSelected ? 'scale-110 ring-4 ring-white shadow-xl' : 'hover:scale-110'}`}>
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  {/* Pin Tail */}
-                  <div className={`w-3 h-3 transform rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2 z-0 ${marker.colorClass}`}></div>
-                </div>
-
-                {/* Selected Popover */}
-                {isSelected && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-64 bg-white rounded-xl shadow-2xl border border-[#E5EAE6] p-4 cursor-default z-20"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-sm ${
-                        marker.severity === 'HIGH' ? 'bg-red-100 text-red-700' : 
-                        marker.severity === 'MEDIUM' ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-700'
-                      }`}>
-                        {marker.severity} PRIORITY
-                      </span>
-                      <button onClick={() => setSelectedMarker(null)} className="text-[#66706A] hover:text-[#171918]">
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                    
-                    <h3 className="font-bold text-base text-[#171918] mb-1">{marker.issue}</h3>
-                    <p className="text-xs font-medium text-[#66706A] mb-3">ID: {marker.ticketId}</p>
-                    
-                    <div className="flex items-center justify-between border-t border-[#E5EAE6] pt-3">
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-[#66706A] font-bold">Status</p>
-                        <p className="text-sm font-bold text-[#171918]">{marker.status}</p>
-                      </div>
-                      <Link href={`/dashboard/issues`} className="bg-[#171918] text-white p-2 rounded-lg hover:bg-black transition-colors">
-                        <ArrowRight className="w-4 h-4" />
-                      </Link>
-                    </div>
-                    
-                    {/* Popover Tail */}
-                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-b border-r border-[#E5EAE6] transform rotate-45"></div>
-                  </motion.div>
-                )}
-              </div>
-            );
-          })}
+        {/* Real Map Area */}
+        <div className="flex-1 bg-[#e5e5e3] relative h-[60vh] md:h-auto z-0">
+          <DynamicMap 
+            markers={filteredMarkers} 
+            activeMarker={selectedMarker} 
+            setActiveMarker={setSelectedMarker} 
+          />
         </div>
       </motion.div>
     </div>

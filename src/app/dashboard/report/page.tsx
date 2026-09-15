@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Camera, MapPin, X, ArrowLeft, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createCivicIssue, uploadIssuePhoto } from "@/lib/supabase";
 
@@ -11,12 +11,58 @@ export default function ReportIssue() {
   const router = useRouter();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isAnalyzed, setIsAnalyzed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [location, setLocation] = useState("22.7196, 75.8577 (Main Road)");
   const [description, setDescription] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      streamRef.current = stream;
+      setIsCameraOpen(true);
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      }, 100);
+    } catch (err) {
+      console.error("Error accessing camera:", err);
+      alert("Camera access is required to report an issue. Please grant permission in your browser.");
+    }
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current) {
+      const canvas = document.createElement("canvas");
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL("image/jpeg");
+        setImagePreview(dataUrl);
+        stopCamera();
+      }
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    setIsCameraOpen(false);
+  };
+
+  useEffect(() => {
+    return () => stopCamera(); // Cleanup on unmount
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -93,25 +139,40 @@ export default function ReportIssue() {
             </h2>
 
             {!imagePreview ? (
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-[#E5EAE6] hover:border-[#16A34A] rounded-2xl p-10 flex flex-col items-center justify-center cursor-pointer transition-colors group bg-gray-50/50"
-              >
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform mb-4">
-                  <Camera className="w-6 h-6 text-[#16A34A]" />
+              isCameraOpen ? (
+                <div className="relative rounded-2xl overflow-hidden bg-black aspect-video md:aspect-[21/9]">
+                  <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                  <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-6">
+                    <button onClick={stopCamera} className="px-5 py-2 bg-black/40 backdrop-blur-md border border-white/20 text-white rounded-full font-bold hover:bg-black/60 transition-colors">
+                      Cancel
+                    </button>
+                    <button onClick={capturePhoto} className="w-16 h-16 bg-white/30 backdrop-blur-sm rounded-full p-1 flex items-center justify-center hover:bg-white/40 transition-colors shadow-xl">
+                      <div className="w-14 h-14 bg-white rounded-full shadow-lg border-2 border-gray-200"></div>
+                    </button>
+                  </div>
                 </div>
-                <p className="text-[#171918] font-medium text-lg text-center">Take Photo or Click to Upload</p>
-                <p className="text-[#66706A] text-sm mt-2 text-center">
-                  Ensure the issue is clearly visible in the frame.
-                </p>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  ref={fileInputRef}
-                  onChange={handleImageUpload}
-                />
-              </div>
+              ) : (
+                <div
+                  onClick={startCamera}
+                  className="border-2 border-dashed border-[#E5EAE6] hover:border-[#16A34A] rounded-2xl p-10 flex flex-col items-center justify-center cursor-pointer transition-colors group bg-gray-50/50"
+                >
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform mb-4">
+                    <Camera className="w-6 h-6 text-[#16A34A]" />
+                  </div>
+                  <p className="text-[#171918] font-medium text-lg text-center">Open Web Camera</p>
+                  <p className="text-[#66706A] text-sm mt-2 text-center">
+                    Your location is captured automatically. Ensure the issue is clearly visible.
+                  </p>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                  />
+                </div>
+              )
             ) : (
               <div className="relative rounded-2xl overflow-hidden bg-gray-100 aspect-video md:aspect-[21/9]">
                 <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
