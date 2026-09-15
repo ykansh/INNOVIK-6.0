@@ -304,20 +304,27 @@ export async function fetchIssues(options?: {
   searchQuery?: string;
 }): Promise<CivicIssue[]> {
   if (!isSupabaseConfigured()) {
-    let items = getLocalIssues();
-    if (options?.status && options.status !== "All") {
-      items = items.filter((i) => i.status.toLowerCase() === options.status?.toLowerCase());
-    }
-    if (options?.searchQuery) {
-      const q = options.searchQuery.toLowerCase();
-      items = items.filter(
-        (i) =>
+    try {
+      let url = '/api/issues?';
+      if (options?.status && options.status !== "All") url += `status=${options.status}&`;
+      if (options?.reporterId) url += `reporterId=${options.reporterId}&`;
+      if (options?.department) url += `department=${options.department}&`;
+      
+      const res = await fetch(url);
+      const items: CivicIssue[] = await res.json();
+      
+      if (options?.searchQuery) {
+        const q = options.searchQuery.toLowerCase();
+        return items.filter((i) =>
           i.title.toLowerCase().includes(q) ||
           i.ticket_id.toLowerCase().includes(q) ||
           i.location.toLowerCase().includes(q)
-      );
+        );
+      }
+      return items;
+    } catch (e) {
+      return getLocalIssues(); // Fallback if API fails
     }
-    return items;
   }
 
   try {
@@ -347,8 +354,14 @@ export async function fetchIssues(options?: {
 
 export async function fetchIssueById(idOrTicket: string): Promise<CivicIssue | null> {
   if (!isSupabaseConfigured()) {
-    const list = getLocalIssues();
-    return list.find((i) => i.id === idOrTicket || i.ticket_id === idOrTicket) || list[0] || null;
+    try {
+      const res = await fetch(`/api/issues?id=${idOrTicket}`);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      const list = getLocalIssues();
+      return list.find((i) => i.id === idOrTicket || i.ticket_id === idOrTicket) || list[0] || null;
+    }
   }
 
   try {
@@ -402,9 +415,19 @@ export async function createCivicIssue(issue: {
     created_at: new Date().toISOString(),
   };
 
-  // Always keep in local state for seamless offline preview
-  const current = getLocalIssues();
-  saveLocalIssues([newIssue, ...current]);
+  // Save via API
+  if (!isSupabaseConfigured()) {
+    try {
+      await fetch('/api/issues', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newIssue)
+      });
+    } catch (e) {
+      const current = getLocalIssues();
+      saveLocalIssues([newIssue, ...current]);
+    }
+  }
 
   if (isSupabaseConfigured()) {
     try {
@@ -423,14 +446,24 @@ export async function updateIssueStatus(
   newStatus: CivicIssue["status"],
   resolutionNote?: string
 ) {
-  // Update local
-  const current = getLocalIssues();
-  const updated = current.map((item) =>
-    item.id === id || item.ticket_id === id
-      ? { ...item, status: newStatus, resolution_note: resolutionNote || item.resolution_note }
-      : item
-  );
-  saveLocalIssues(updated);
+  // Update local/API
+  if (!isSupabaseConfigured()) {
+    try {
+      await fetch('/api/issues', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: newStatus, resolution_note: resolutionNote, resolved_at: newStatus === "Resolved" || newStatus === "Closed" ? new Date().toISOString() : undefined })
+      });
+    } catch (e) {
+      const current = getLocalIssues();
+      const updated = current.map((item) =>
+        item.id === id || item.ticket_id === id
+          ? { ...item, status: newStatus, resolution_note: resolutionNote || item.resolution_note }
+          : item
+      );
+      saveLocalIssues(updated);
+    }
+  }
 
   if (isSupabaseConfigured()) {
     try {

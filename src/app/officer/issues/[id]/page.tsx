@@ -14,6 +14,7 @@ export default function OfficerIssueDetail({ params }: { params: Promise<{ id: s
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("ASSIGNED");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [aiVerification, setAiVerification] = useState<{confidence: number, verified: boolean, reasoning: string} | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -48,11 +49,29 @@ export default function OfficerIssueDetail({ params }: { params: Promise<{ id: s
   const handleUploadResolution = async () => {
     setIsUpdating(true);
     try {
-      await updateIssueStatus(id, "Resolved", "Issue has been verified and resolved by the municipal team.");
+      // 1. Trigger Agentic AI Verification
+      const aiRes = await fetch('/api/ai/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          beforeImage: currentTicket.image_url || "/sequence/frame_5.jpg",
+          afterImage: "/sequence/frame_25.jpg",
+          issueCategory: currentTicket.category,
+          issueDescription: currentTicket.description
+        })
+      });
+      const aiData = await aiRes.json();
+      setAiVerification(aiData);
+
+      // 2. Update Database Status
+      const resolutionNote = `AI Verified (${aiData.confidence}%): ${aiData.reasoning}`;
+      await updateIssueStatus(id, "Resolved", resolutionNote);
+      
       setStatus("RESOLVED");
-      if (issue) setIssue({ ...issue, status: "Resolved", resolution_note: "Issue has been verified and resolved by the municipal team." });
+      if (issue) setIssue({ ...issue, status: "Resolved", resolution_note: resolutionNote });
     } catch (e) {
       console.error(e);
+      alert("Verification failed. Please try again.");
     } finally {
       setIsUpdating(false);
     }
@@ -277,18 +296,38 @@ export default function OfficerIssueDetail({ params }: { params: Promise<{ id: s
               </div>
             </div>
             
-            <div className="p-6 md:p-8 bg-gray-50/50">
-              <h2 className="text-sm font-bold text-[#171918] uppercase tracking-wider mb-4">Comparison</h2>
+            <div className="p-6 md:p-8 bg-gray-50/50 space-y-6">
+              <h2 className="text-sm font-bold text-[#171918] uppercase tracking-wider">Verification Evidence</h2>
+              
+              {aiVerification && (
+                <div className="bg-white border border-blue-200 rounded-xl p-4 shadow-sm space-y-3 mb-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+                  <div className="flex items-center gap-2 mb-2 relative z-10">
+                    <Zap className="w-5 h-5 text-blue-500 fill-blue-500" />
+                    <h3 className="font-bold text-blue-800">Agentic AI Verification</h3>
+                  </div>
+                  <p className="text-sm text-[#171918] relative z-10">
+                    <strong>Reasoning:</strong> {aiVerification.reasoning}
+                  </p>
+                  <div className="pt-3 border-t border-[#E5EAE6] flex justify-between items-center text-sm relative z-10">
+                    <span className="font-medium text-[#66706A]">Resolution Confidence</span>
+                    <span className={`font-bold ${aiVerification.confidence > 80 ? 'text-[#16A34A]' : 'text-orange-500'}`}>
+                      {aiVerification.confidence}%
+                    </span>
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-6">
                 <div>
-                  <span className="text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded uppercase tracking-wider mb-2 inline-block">Before</span>
-                  <div className="aspect-[4/3] rounded-xl overflow-hidden bg-gray-200 shadow-inner">
-                    <img src={currentTicket.image_url || "/sequence/frame_5.jpg"} alt="Before" className="w-full h-full object-cover opacity-80" />
+                  <span className="text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded uppercase tracking-wider mb-2 inline-block">Before (Reported)</span>
+                  <div className="aspect-[4/3] rounded-xl overflow-hidden bg-gray-200 shadow-inner border border-[#E5EAE6]">
+                    <img src={currentTicket.image_url || "/sequence/frame_5.jpg"} alt="Before" className="w-full h-full object-cover" />
                   </div>
                 </div>
                 <div>
-                  <span className="text-xs font-bold text-[#16A34A] bg-[#DCFCE7] px-2 py-1 rounded uppercase tracking-wider mb-2 inline-block">After</span>
-                  <div className="aspect-[4/3] rounded-xl overflow-hidden bg-gray-200 shadow-inner">
+                  <span className="text-xs font-bold text-[#16A34A] bg-[#DCFCE7] px-2 py-1 rounded uppercase tracking-wider mb-2 inline-block">After (Repaired)</span>
+                  <div className="aspect-[4/3] rounded-xl overflow-hidden bg-gray-200 shadow-inner border border-[#E5EAE6]">
                     <img src="/sequence/frame_25.jpg" alt="After" className="w-full h-full object-cover" />
                   </div>
                 </div>
