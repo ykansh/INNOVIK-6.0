@@ -16,8 +16,11 @@ export default function ReportIssue() {
   const streamRef = useRef<MediaStream | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isAnalyzed, setIsAnalyzed] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<{title: string, category: string, department: string, severity: string, isValid?: boolean, reason?: string} | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [location, setLocation] = useState("22.7196, 75.8577 (Main Road)");
+  const [location, setLocation] = useState("");
+  const [coordinates, setCoordinates] = useState<{lat: number, lng: number} | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
   const [description, setDescription] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -60,6 +63,29 @@ export default function ReportIssue() {
     setIsCameraOpen(false);
   };
 
+  const handleLocateMe = () => {
+    setIsLocating(true);
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setCoordinates({ lat, lng });
+          setLocation(`${lat.toFixed(5)}, ${lng.toFixed(5)} (GPS Coordinates)`);
+          setIsLocating(false);
+        },
+        (error) => {
+          console.error(error);
+          alert("Failed to get location. Please allow location access.");
+          setIsLocating(false);
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser");
+      setIsLocating(false);
+    }
+  };
+
   useEffect(() => {
     return () => stopCamera(); // Cleanup on unmount
   }, []);
@@ -73,13 +99,31 @@ export default function ReportIssue() {
     }
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
+    if (!imagePreview) return;
     setIsAnalyzing(true);
-    // Simulate AI Analysis
-    setTimeout(() => {
-      setIsAnalyzing(false);
+    try {
+      const res = await fetch('/api/ai/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: imagePreview })
+      });
+      const data = await res.json();
+      setAnalysisResult(data);
       setIsAnalyzed(true);
-    }, 1800);
+    } catch (e) {
+      console.error(e);
+      setAnalysisResult({
+        isValid: true,
+        title: "Unidentified Issue (Error)",
+        category: "General",
+        department: "Municipal Services",
+        severity: "Medium"
+      });
+      setIsAnalyzed(true);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleSubmitReport = async () => {
@@ -91,13 +135,15 @@ export default function ReportIssue() {
       }
 
       await createCivicIssue({
-        title: "Fallen Electric Wire",
-        category: "Electrical Services",
+        title: analysisResult?.title || "Civic Issue",
+        category: analysisResult?.category || "General",
         location: location || "Downtown City Center",
         description: description,
         imageUrl: finalImageUrl,
-        severity: "High",
-        department: "Electrical Dept",
+        severity: (analysisResult?.severity as any) || "Medium",
+        department: analysisResult?.department || "Municipal Services",
+        latitude: coordinates?.lat,
+        longitude: coordinates?.lng
       });
 
       router.push("/dashboard/issues");
@@ -198,23 +244,46 @@ export default function ReportIssue() {
                   </div>
                 )}
 
-                {isAnalyzed && (
-                  <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border border-white/20 flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="bg-[#16A34A] text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-sm">
-                          AI Analyzed
-                        </span>
-                        <span className="text-[#171918] font-bold">Fallen Electric Wire</span>
+                {isAnalyzed && analysisResult && (
+                  <div className={`absolute bottom-4 left-4 right-4 backdrop-blur-md p-4 rounded-xl shadow-lg border flex items-center justify-between ${
+                    analysisResult.isValid === false ? 'bg-red-50/95 border-red-200' : 'bg-white/95 border-white/20'
+                  }`}>
+                    {analysisResult.isValid === false ? (
+                      <div className="w-full">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="bg-red-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-sm">
+                            Invalid Report
+                          </span>
+                          <span className="text-red-900 font-bold">{analysisResult.title}</span>
+                        </div>
+                        <p className="text-sm text-red-700 mt-1">
+                          {analysisResult.reason || "This image does not appear to show a valid civic issue. Please capture a clearer photo."}
+                        </p>
                       </div>
-                      <p className="text-sm text-[#66706A]">
-                        Routing to: <span className="font-medium text-[#171918]">Electrical Services</span>
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-[#66706A] uppercase tracking-wider mb-1">Severity</p>
-                      <p className="text-sm font-bold text-red-600">HIGH</p>
-                    </div>
+                    ) : (
+                      <>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="bg-[#16A34A] text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-sm">
+                              AI Analyzed
+                            </span>
+                            <span className="text-[#171918] font-bold">{analysisResult?.title || "Civic Issue"}</span>
+                          </div>
+                          <p className="text-sm text-[#66706A]">
+                            Routing to: <span className="font-medium text-[#171918]">{analysisResult?.department || "Municipal Services"}</span>
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-[#66706A] uppercase tracking-wider mb-1">Severity</p>
+                          <p className={`text-sm font-bold ${
+                            analysisResult?.severity?.toLowerCase() === 'high' || analysisResult?.severity?.toLowerCase() === 'critical' 
+                              ? 'text-red-600' : 'text-orange-500'
+                          }`}>
+                            {analysisResult?.severity?.toUpperCase() || "MEDIUM"}
+                          </p>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -236,14 +305,16 @@ export default function ReportIssue() {
                   placeholder="Enter or fetch location..."
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="block w-full rounded-xl border-0 py-3.5 pl-10 pr-24 text-[#171918] shadow-sm ring-1 ring-inset ring-[#E5EAE6] placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#16A34A] sm:text-sm sm:leading-6 bg-[#F7FAF8]"
+                  className="block w-full rounded-xl border-0 py-3.5 pl-10 pr-28 text-[#171918] shadow-sm ring-1 ring-inset ring-[#E5EAE6] placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#16A34A] sm:text-sm sm:leading-6 bg-[#F7FAF8]"
                 />
                 <button
                   type="button"
-                  onClick={() => setLocation("22.7196, 75.8577 (Main Road)")}
-                  className="absolute inset-y-2 right-2 px-3 bg-white border border-[#E5EAE6] rounded-lg text-sm font-medium text-[#171918] hover:bg-gray-50 transition-colors shadow-sm"
+                  onClick={handleLocateMe}
+                  disabled={isLocating}
+                  className="absolute inset-y-2 right-2 px-3 bg-white border border-[#E5EAE6] rounded-lg text-sm font-medium text-[#171918] hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50 flex items-center gap-1"
                 >
-                  Locate Me
+                  {isLocating ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                  {isLocating ? "Locating..." : "Locate Me"}
                 </button>
               </div>
             </div>
@@ -282,11 +353,11 @@ export default function ReportIssue() {
               </button>
             ) : (
               <button
-                onClick={handleSubmitReport}
-                disabled={isSubmitting}
-                className="flex items-center gap-2 px-8 py-3 rounded-xl bg-[#16A34A] text-white font-bold hover:bg-[#087A3D] transition-colors shadow-sm disabled:opacity-70"
-              >
-                {isSubmitting ? (
+            onClick={handleSubmitReport}
+            disabled={isSubmitting || !location || !imagePreview || (isAnalyzed && analysisResult?.isValid === false)}
+            className="w-full sm:w-auto px-8 py-3.5 bg-[#16A34A] text-white rounded-xl font-bold hover:bg-[#15803d] transition-all transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-green-500/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-none"
+          >
+            {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Submitting to Supabase...

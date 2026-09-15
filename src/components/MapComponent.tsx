@@ -31,9 +31,9 @@ export default function MapComponent({ markers, activeMarker, setActiveMarker }:
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
       />
       {markers.map((marker: any) => {
-        // Convert mock percentage coordinates to actual lat/lng around the base coordinate
-        const lat = BASE_LAT + ((50 - marker.y) * 0.0005);
-        const lng = BASE_LNG + ((marker.x - 50) * 0.0005);
+        // Use real lat/lng if available, otherwise fallback to slightly randomized around base
+        const lat = marker.latitude || (BASE_LAT + (Math.random() - 0.5) * 0.01);
+        const lng = marker.longitude || (BASE_LNG + (Math.random() - 0.5) * 0.01);
 
         return (
           <Marker 
@@ -45,10 +45,10 @@ export default function MapComponent({ markers, activeMarker, setActiveMarker }:
           >
             <Popup>
               <div className="text-sm font-sans min-w-[150px]">
-                <div className="font-bold text-[#171918] text-base mb-1">{marker.issue}</div>
+                <div className="font-bold text-[#171918] text-base mb-1">{marker.title}</div>
                 <div className="flex justify-between items-center text-xs mb-2 text-[#66706A]">
-                  <span>{marker.ticketId}</span>
-                  <span className={`font-bold ${marker.severity === 'HIGH' ? 'text-red-600' : 'text-orange-600'}`}>{marker.severity}</span>
+                  <span>{marker.ticket_id}</span>
+                  <span className={`font-bold ${marker.severity?.toLowerCase() === 'high' || marker.severity?.toLowerCase() === 'critical' ? 'text-red-600' : 'text-orange-600'}`}>{marker.severity}</span>
                 </div>
                 <div className="pt-2 border-t border-gray-100 font-medium text-blue-600">
                   Status: {marker.status}

@@ -19,6 +19,8 @@ const fallbackIssues: CivicIssue[] = [
     department: "Road Maintenance",
     image_url: "/sequence/frame_25.jpg",
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+    latitude: 22.7196,
+    longitude: 75.8577,
   },
   {
     id: "2",
@@ -31,6 +33,8 @@ const fallbackIssues: CivicIssue[] = [
     department: "Electrical Dept",
     image_url: "/sequence/frame_10.jpg",
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 120).toISOString(),
+    latitude: 22.7210,
+    longitude: 75.8600,
   },
   {
     id: "3",
@@ -43,6 +47,8 @@ const fallbackIssues: CivicIssue[] = [
     department: "Parks & Recreation",
     image_url: "/sequence/frame_5.jpg",
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+    latitude: 22.7150,
+    longitude: 75.8550,
   },
   {
     id: "5",
@@ -55,6 +61,8 @@ const fallbackIssues: CivicIssue[] = [
     department: "Electrical Dept",
     image_url: "/sequence/frame_25.jpg",
     created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    latitude: 22.7180,
+    longitude: 75.8500,
   }
 ];
 

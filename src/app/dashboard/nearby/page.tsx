@@ -3,8 +3,9 @@
 import { motion } from "framer-motion";
 import { ArrowLeft, MapPin, Search, Zap, Droplets, Trash2, ArrowRight, X } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import { fetchIssues, CivicIssue } from "@/lib/supabase";
 
 const DynamicMap = dynamic(() => import("@/components/MapComponent"), {
   ssr: false,
@@ -24,66 +25,16 @@ const categories = [
   { name: "Water", icon: Droplets, color: "bg-blue-100 text-blue-700" },
 ];
 
-const mockMapMarkers = [
-  {
-    id: "1",
-    ticketId: "CIV-ISS-1042",
-    category: "Street Lights",
-    issue: "Fallen Electric Wire",
-    severity: "HIGH",
-    status: "Assigned",
-    x: 40,
-    y: 35,
-    icon: Zap,
-    colorClass: "bg-yellow-500 text-white",
-    pulse: true
-  },
-  {
-    id: "2",
-    ticketId: "CIV-ISS-1011",
-    category: "Garbage",
-    issue: "Overflowing Dumpster",
-    severity: "MEDIUM",
-    status: "Open",
-    x: 65,
-    y: 20,
-    icon: Trash2,
-    colorClass: "bg-orange-500 text-white",
-    pulse: false
-  },
-  {
-    id: "3",
-    ticketId: "CIV-ISS-0988",
-    category: "Roads",
-    issue: "Deep Pothole",
-    severity: "LOW",
-    status: "In Progress",
-    x: 25,
-    y: 70,
-    icon: MapPin,
-    colorClass: "bg-slate-500 text-white",
-    pulse: false
-  },
-  {
-    id: "4",
-    ticketId: "CIV-ISS-1055",
-    category: "Water",
-    issue: "Burst Pipe",
-    severity: "HIGH",
-    status: "Under Review",
-    x: 75,
-    y: 65,
-    icon: Droplets,
-    colorClass: "bg-blue-500 text-white",
-    pulse: true
-  }
-];
-
 export default function NearbyIssues() {
   const [activeCategory, setActiveCategory] = useState("All");
-  const [selectedMarker, setSelectedMarker] = useState<typeof mockMapMarkers[0] | null>(null);
+  const [issues, setIssues] = useState<CivicIssue[]>([]);
+  const [selectedMarker, setSelectedMarker] = useState<CivicIssue | null>(null);
 
-  const filteredMarkers = mockMapMarkers.filter(m => activeCategory === "All" || m.category === activeCategory);
+  useEffect(() => {
+    fetchIssues().then(data => setIssues(data));
+  }, []);
+
+  const filteredMarkers = issues.filter(m => activeCategory === "All" || m.category === activeCategory || (activeCategory === "Roads" && m.category.includes("Road")));
 
   return (
     <div className="space-y-6 h-[calc(100vh-140px)] flex flex-col">
@@ -152,15 +103,15 @@ export default function NearbyIssues() {
                   }`}
                 >
                   <div className="flex items-start justify-between mb-1">
-                    <span className="text-xs font-bold text-[#66706A]">{marker.ticketId}</span>
+                    <span className="text-xs font-bold text-[#66706A]">{marker.ticket_id}</span>
                     <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${
-                      marker.severity === 'HIGH' ? 'bg-red-100 text-red-700' : 
-                      marker.severity === 'MEDIUM' ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-700'
+                      marker.severity?.toLowerCase() === 'high' || marker.severity?.toLowerCase() === 'critical' ? 'bg-red-100 text-red-700' : 
+                      marker.severity?.toLowerCase() === 'medium' ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-700'
                     }`}>
                       {marker.severity}
                     </span>
                   </div>
-                  <h3 className="font-bold text-sm text-[#171918]">{marker.issue}</h3>
+                  <h3 className="font-bold text-sm text-[#171918]">{marker.title}</h3>
                   <p className="text-xs text-[#66706A] mt-1 flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                     {marker.status}
