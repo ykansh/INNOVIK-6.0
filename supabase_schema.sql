@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS public.issues (
   reporter_name TEXT,
   resolution_note TEXT,
   resolved_at TIMESTAMPTZ,
+  sla_deadline TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL
 );

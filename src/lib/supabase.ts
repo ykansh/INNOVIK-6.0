@@ -50,6 +50,8 @@ export interface CivicIssue {
   resolution_note?: string;
   created_at: string;
   updated_at?: string;
+  resolved_at?: string;
+  sla_deadline?: string;
 }
 
 // Default fallback issues for demo/offline resilience
@@ -65,6 +67,9 @@ const fallbackIssues: CivicIssue[] = [
     department: "Road Maintenance",
     image_url: "/sequence/frame_25.jpg",
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+    sla_deadline: new Date(Date.now() - 1000 * 60 * 60 * 40).toISOString(),
+    latitude: 22.7196,
+    longitude: 75.8577,
   },
   {
     id: "2",
@@ -77,6 +82,10 @@ const fallbackIssues: CivicIssue[] = [
     department: "Electrical Dept",
     image_url: "/sequence/frame_10.jpg",
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 120).toISOString(),
+    resolved_at: new Date(Date.now() - 1000 * 60 * 60 * 115).toISOString(),
+    sla_deadline: new Date(Date.now() - 1000 * 60 * 60 * 112).toISOString(),
+    latitude: 22.7210,
+    longitude: 75.8600,
   },
   {
     id: "3",
@@ -89,6 +98,9 @@ const fallbackIssues: CivicIssue[] = [
     department: "Parks & Recreation",
     image_url: "/sequence/frame_5.jpg",
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+    sla_deadline: new Date(Date.now() - 1000 * 60 * 60 * 16).toISOString(),
+    latitude: 22.7150,
+    longitude: 75.8550,
   },
   {
     id: "4",
@@ -101,6 +113,9 @@ const fallbackIssues: CivicIssue[] = [
     department: "Drainage Works",
     image_url: "/sequence/frame_2.jpg",
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
+    sla_deadline: new Date(Date.now() + 1000 * 60 * 60 * 18).toISOString(),
+    latitude: 22.7120,
+    longitude: 75.8650,
   },
   {
     id: "5",
@@ -113,6 +128,9 @@ const fallbackIssues: CivicIssue[] = [
     department: "Electrical Dept",
     image_url: "/sequence/frame_25.jpg",
     created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    sla_deadline: new Date(Date.now() + 1000 * 60 * 60 * 2.5).toISOString(),
+    latitude: 22.7180,
+    longitude: 75.8500,
   }
 ];
 
@@ -397,6 +415,14 @@ export async function createCivicIssue(issue: {
   const ticketId = `CIV-ISS-${ticketNumber}`;
   const user = await getCurrentUserProfile();
 
+  const severity = issue.severity || "Medium";
+  let slaHours = 8;
+  if (severity.toLowerCase() === 'critical') slaHours = 3;
+  if (severity.toLowerCase() === 'low') slaHours = 24;
+  
+  const createdAt = new Date();
+  const slaDeadline = new Date(createdAt.getTime() + slaHours * 60 * 60 * 1000);
+
   const newIssue: CivicIssue = {
     id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     ticket_id: ticketId,
@@ -412,7 +438,8 @@ export async function createCivicIssue(issue: {
     department: issue.department || "Public Works",
     reporter_id: user?.id,
     reporter_name: user?.full_name || "Citizen",
-    created_at: new Date().toISOString(),
+    created_at: createdAt.toISOString(),
+    sla_deadline: slaDeadline.toISOString(),
   };
 
   // Save via API

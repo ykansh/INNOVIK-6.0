@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, MapPin, AlertTriangle, CheckCircle, Zap, Camera, Play, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, MapPin, AlertTriangle, CheckCircle, Zap, Camera, Play, Check, Loader2, Clock, Clock3 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, use } from "react";
 import { fetchIssueById, updateIssueStatus, CivicIssue } from "@/lib/supabase";
@@ -104,6 +104,32 @@ export default function OfficerIssueDetail({ params }: { params: Promise<{ id: s
     created_at: new Date().toISOString(),
   };
 
+  // SLA Calculation
+  const slaDeadline = currentTicket.sla_deadline ? new Date(currentTicket.sla_deadline) : null;
+  const isResolved = status === 'RESOLVED' || status === 'CLOSED';
+  const comparisonDate = isResolved && currentTicket.resolved_at ? new Date(currentTicket.resolved_at) : new Date();
+  
+  let slaStatus = "No SLA";
+  let slaDiffText = "";
+  let isBreached = false;
+
+  if (slaDeadline) {
+    const diffMs = comparisonDate.getTime() - slaDeadline.getTime();
+    isBreached = diffMs > 0;
+    
+    const absDiffMs = Math.abs(diffMs);
+    const diffHours = Math.floor(absDiffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((absDiffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    slaDiffText = `${diffHours}h ${diffMinutes}m`;
+    
+    if (isBreached) {
+      slaStatus = "SLA BREACHED";
+    } else {
+      slaStatus = isResolved ? "SLA MET" : "TIME REMAINING";
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       
@@ -147,6 +173,17 @@ export default function OfficerIssueDetail({ params }: { params: Promise<{ id: s
                 <div>
                   <span className="font-medium text-[#171918]">Reported on:</span> {new Date(currentTicket.created_at).toLocaleDateString()}
                 </div>
+                
+                {slaDeadline && (
+                  <div className={`flex items-center gap-1.5 font-bold px-2 py-0.5 rounded-md ${
+                    isBreached ? 'bg-red-100 text-red-700' : 
+                    isResolved ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    <Clock3 className="w-4 h-4" />
+                    <span>{slaStatus}:</span>
+                    <span>{isBreached && !isResolved ? '+' : ''}{slaDiffText}</span>
+                  </div>
+                )}
               </div>
             </div>
             
