@@ -1,0 +1,1020 @@
+
+ 
+make a sign in and sign up page when we click sign in and a sign up page when we click sign up. 
+in sign in and sign up there should be 3 sections roles 
+    citizen , officer and supervisor
+
+for citizen :
+
+ACT AS
+
+A world-class product designer and Creative Developer specializing in:
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Framer Motion
+- Supabase
+- Responsive SaaS dashboards
+- Premium civic-tech UX/UI
+
+Build a complete production-ready website and web application for:
+
+# CVQ
+
+CVQ is a civic problem reporting and resolution platform.
+
+The core idea:
+
+A citizen sees a civic problem → captures it → submits it → AI analyzes it → the issue is assigned to the correct municipal department → the citizen tracks progress → the citizen verifies the resolution.
+
+The website should feel like a modern civic-tech platform, NOT like an old government portal.
+
+--------------------------------------------------
+DESIGN DIRECTION
+--------------------------------------------------
+
+Visual style:
+
+- Premium
+- Minimal
+- Clean
+- Human
+- Civic-tech
+- Trustworthy
+- Modern
+- Highly usable
+- Apple / Linear / Stripe inspired
+- Soft rounded corners
+- Excellent whitespace
+- Clear information hierarchy
+- Subtle animations
+
+--------------------------------------------------
+BRAND
+--------------------------------------------------
+
+Brand:
+
+CVQ
+
+Suggested positioning:
+
+"Turn civic problems into visible action."
+
+Primary concept:
+
+SEE IT → REPORT IT → SOLVE IT
+
+Color system:
+
+Background:
+#F7FAF8
+
+Primary green:
+#16A34A
+
+Soft green:
+#DCFCE7
+
+Text:
+#171918
+
+Secondary text:
+#66706A
+
+Border:
+#E5EAE6
+
+White:
+#FFFFFF
+
+Use green as the primary action/accent color, but keep the overall interface mostly white / neutral.
+
+--------------------------------------------------
+GLOBAL NAVIGATION
+--------------------------------------------------
+
+Create a clean top navigation.
+
+Left:
+
+CVQ logo
+
+Center / desktop navigation:
+
+- Home
+- Report Issue
+- My Issues
+- Nearby Issues
+
+Right:
+
+- Notifications
+- Profile
+- "Report a Problem" primary button
+
+Mobile:
+
+Use a clean hamburger navigation.
+
+--------------------------------------------------
+MAIN USER ARCHITECTURE
+--------------------------------------------------
+
+The product should follow this exact journey:
+
+1. Citizen Home
+2. Report Issue
+3. AI Analysis
+4. Ticket Created
+5. Track Status
+6. Verify & Close
+
+The reference architecture should be preserved conceptually, but redesigned with a modern CVQ identity.
+
+--------------------------------------------------
+PAGE 1 — CITIZEN HOME
+--------------------------------------------------
+
+Create a dashboard/home screen.
+
+Header:
+
+"Hi, [User Name] 👋"
+
+Subheading:
+
+"Help make your city better, one report at a time."
+
+Main action:
+
+Large primary CTA:
+
+"Report an Issue"
+
+Secondary action:
+
+"Track My Issues"
+
+Dashboard cards:
+
+Open Issues
+Resolved Issues
+In Progress
+
+Create a prominent quick-action section:
+
+REPORT A PROBLEM
+
+"See something that needs attention?"
+
+Button:
+
+"Take a Photo & Report"
+
+Below:
+
+"My Recent Issues"
+
+Each issue shows:
+
+- Image
+- Issue ID
+- Issue category
+- Location
+- Date
+- Current status
+
+Status examples:
+
+Open
+Under Review
+Assigned
+In Progress
+Resolved
+
+--------------------------------------------------
+PAGE 2 — REPORT ISSUE
+--------------------------------------------------
+
+Create a focused reporting interface.
+
+Title:
+
+"Report a Civic Issue"
+
+Subtitle:
+
+"Help us understand what needs fixing."
+
+Main upload area:
+
+"Take Photo"
+
+"Upload Photo"
+
+Drag-and-drop support on desktop.
+
+After image upload show:
+
+- Image preview
+- Retake
+- Change image
+
+Fields:
+
+Description
+
+Location
+
+Category
+
+Optional additional information.
+
+Location should support:
+
+"Use my current location"
+
+Automatically capture:
+
+- Latitude
+- Longitude
+- Human-readable address
+
+Primary CTA:
+
+"Submit Report"
+
+Keep this page extremely simple.
+
+The user should be able to submit an issue in seconds.
+
+--------------------------------------------------
+PAGE 3 — AI ANALYSIS
+--------------------------------------------------
+
+After submitting the photo, show an AI processing state.
+
+Title:
+
+"AI is analyzing your report"
+
+Animated visual indicator.
+
+Show:
+
+Uploaded image
+
+Then automatically determine:
+
+Category:
+Road / Pothole
+
+Severity:
+High
+
+Department:
+Roads & Infrastructure
+
+Location:
+Detected automatically
+
+Estimated response:
+12 hours
+
+AI confidence:
+94%
+
+Use subtle animated progress indicators.
+
+Example copy:
+
+"Identifying the issue..."
+"Checking severity..."
+"Finding the right department..."
+"Preparing your report..."
+
+When complete:
+
+"Analysis Complete"
+
+CTA:
+
+"Confirm & Submit"
+
+Allow user to edit the AI-generated category if necessary.
+
+--------------------------------------------------
+PAGE 4 — TICKET CREATED
+--------------------------------------------------
+
+After confirmation, show a strong success state.
+
+Large success icon.
+
+Title:
+
+"Report Submitted!"
+
+Subtitle:
+
+"Your report has been sent to the relevant municipal department."
+
+Show:
+
+Ticket ID
+
+CIV-ISS-1042
+
+Issue:
+
+Pothole
+
+Location:
+
+Detected location
+
+Department:
+
+Roads & Infrastructure
+
+Priority:
+
+High
+
+Estimated response:
+
+12 hours
+
+Primary CTA:
+
+"Track Issue"
+
+Secondary:
+
+"Back to Home"
+
+--------------------------------------------------
+PAGE 5 — MY ISSUES / TRACK STATUS
+--------------------------------------------------
+
+Create a complete issue tracking page.
+
+Top:
+
+"My Issues"
+
+Tabs:
+
+- All
+- Open
+- In Progress
+- Resolved
+
+Each issue appears as a clean horizontal or card-based item.
+
+Show:
+
+Issue image
+Ticket ID
+Issue type
+Location
+Date
+Current status
+
+Example:
+
+CIV-ISS-1042
+Pothole
+
+HIGH
+
+In Progress
+
+12h remaining
+
+Clicking an issue opens a detailed tracking page.
+
+--------------------------------------------------
+ISSUE DETAIL PAGE
+--------------------------------------------------
+
+Create a timeline.
+
+Example:
+
+REPORT SUBMITTED
+✓
+15 Sep, 10:32 AM
+
+AI ANALYZED
+✓
+15 Sep, 10:33 AM
+
+ASSIGNED TO DEPARTMENT
+✓
+15 Sep, 10:35 AM
+
+WORKER ASSIGNED
+●
+15 Sep, 11:10 AM
+
+REPAIR IN PROGRESS
+○
+
+VERIFICATION
+○
+
+RESOLVED
+○
+
+Make the timeline visually clear and easy to understand.
+
+Show the worker/municipality status when applicable.
+
+--------------------------------------------------
+PAGE 6 — VERIFY & CLOSE
+--------------------------------------------------
+
+This page is shown once the municipality marks the issue as resolved.
+
+Title:
+
+"Is the issue actually fixed?"
+
+Show a clear Before / After comparison.
+
+Before:
+Original citizen photo.
+
+After:
+Municipality uploaded resolution photo.
+
+AI verification:
+
+"AI Verification"
+
+"94% likely resolved"
+
+Then ask the citizen:
+
+"Did this solve the problem?"
+
+Two large actions:
+
+YES, IT'S FIXED
+
+STILL A PROBLEM
+
+If the citizen selects:
+
+YES, IT'S FIXED
+
+→ Mark issue as resolved.
+
+If:
+
+STILL A PROBLEM
+
+→ Reopen issue and notify the relevant department.
+
+This feedback loop is a CORE CVQ feature.
+
+--------------------------------------------------
+NEARBY ISSUES
+--------------------------------------------------
+
+Create a map-based page called:
+
+"Nearby Issues"
+
+Users can view civic problems around them.
+
+Issue categories:
+
+- Roads
+- Garbage
+- Street Lights
+- Drainage
+- Water
+- Public Infrastructure
+- Other
+
+Each map marker should show:
+
+Issue type
+Severity
+Current status
+
+Click marker:
+
+View Issue
+
+Do not expose sensitive citizen information.
+
+--------------------------------------------------
+NOTIFICATIONS
+--------------------------------------------------
+
+Create a notification center.
+
+Examples:
+
+"Your pothole report CIV-ISS-1042 has been assigned."
+
+"A municipal worker has started working on your issue."
+
+"Your issue has been marked as resolved."
+
+"Please verify whether the issue has been fixed."
+
+Use unread indicators.
+
+--------------------------------------------------
+PROFILE
+--------------------------------------------------
+
+Create a simple citizen profile.
+
+Show:
+
+Name
+Email
+Phone
+Total Reports
+Resolved Reports
+Open Reports
+
+Settings:
+
+Notifications
+Location permissions
+Privacy
+
+--------------------------------------------------
+DESKTOP LAYOUT
+--------------------------------------------------
+
+Use a responsive SaaS dashboard architecture.
+
+Desktop:
+
+Sidebar or top navigation
+
+Main content area
+
+Optional right-side contextual information
+
+Use max-width around:
+
+1200–1400px
+
+Generous whitespace.
+
+--------------------------------------------------
+MOBILE LAYOUT
+--------------------------------------------------
+
+Mobile-first responsive design.
+
+Bottom navigation:
+
+Home
+Report
+Issues
+Nearby
+Profile
+
+The "Report" action should be visually prominent.
+
+Forms must be easy to use with one hand.
+
+Large touch targets.
+
+Camera/upload functionality should be immediately accessible.
+
+--------------------------------------------------
+ANIMATIONS
+--------------------------------------------------
+
+Use Framer Motion.
+
+Animations should be subtle and premium.
+
+Use:
+
+- Fade
+- Slide
+- Scale
+- Layout transitions
+- Page transitions
+- Progress animations
+- Skeleton loading
+- Success animations
+
+Avoid excessive bouncing or flashy animations.
+
+Important transitions:
+
+Photo uploaded
+→ AI analyzing
+→ AI complete
+→ Report submitted
+→ Ticket created
+→ Department assigned
+→ Worker begins repair
+→ Citizen verifies
+
+--------------------------------------------------
+AI EXPERIENCE
+--------------------------------------------------
+
+AI should feel like a real product feature, not decoration.
+
+AI analyzes:
+
+- Image
+- Issue category
+- Severity
+- Department
+- Duplicate reports
+- Approximate response priority
+- Resolution verification
+
+Show AI reasoning in a simple human-readable format.
+
+Example:
+
+"Detected a large road pothole."
+
+"Severity classified as High."
+
+"Recommended department: Roads & Infrastructure."
+
+--------------------------------------------------
+BACKEND
+--------------------------------------------------
+
+Use Supabase.
+
+Create a proper relational architecture.
+
+Tables should conceptually include:
+
+users
+issues
+issue_images
+issue_categories
+departments
+issue_assignments
+issue_status_history
+notifications
+resolution_reports
+verification_results
+
+Use proper relationships.
+
+Issue should include:
+
+id
+ticket_id
+user_id
+category_id
+department_id
+description
+latitude
+longitude
+address
+severity
+status
+created_at
+updated_at
+
+Status system:
+
+OPEN
+UNDER_REVIEW
+ASSIGNED
+IN_PROGRESS
+RESOLVED
+REOPENED
+CLOSED
+
+--------------------------------------------------
+CORE FUNCTIONALITY
+--------------------------------------------------
+
+The app must actually work.
+
+Users must be able to:
+
+Create account
+Login
+Upload image
+Submit issue
+Capture location
+Edit report
+Track issue
+Receive notifications
+View issue history
+Verify resolution
+Reopen issue
+
+All submitted information should persist in Supabase.
+
+Do NOT use fake static data as the primary implementation.
+
+--------------------------------------------------
+ADMIN / MUNICIPALITY ARCHITECTURE
+--------------------------------------------------
+
+Also create role-based access.
+
+Roles:
+
+CITIZEN
+WORKER
+DEPARTMENT_ADMIN
+SUPER_ADMIN
+
+Municipal workers should be able to:
+
+View assigned issues
+See location
+See citizen-submitted photo
+Update status
+Upload repair evidence
+Mark issue as resolved
+
+Department admins should be able to:
+
+View department issues
+Assign workers
+Change priority
+Monitor resolution times
+View analytics
+
+--------------------------------------------------
+ADMIN DASHBOARD
+--------------------------------------------------
+
+Create a separate municipality dashboard.
+
+Top statistics:
+
+Total Issues
+Open
+In Progress
+Resolved
+High Priority
+
+Charts:
+
+Issues by category
+Issues by location
+Resolution time
+Issues over time
+
+Map:
+
+Live issue locations.
+
+Table:
+
+Ticket
+Category
+Location
+Priority
+Assigned Worker
+Status
+Created
+Action
+
+--------------------------------------------------
+LANDING PAGE
+--------------------------------------------------
+
+Before the application/dashboard, create a premium CVQ marketing landing page.
+
+Hero:
+
+"SEE IT.
+REPORT IT.
+SOLVE IT."
+
+Subtitle:
+
+"CVQ turns everyday civic problems into visible action."
+
+CTA:
+
+"Report a Problem"
+
+Secondary:
+
+"Explore How CVQ Works"
+
+Hero visual:
+
+Use a cinematic sequence showing:
+
+Citizen notices problem
+↓
+Takes photo
+↓
+CVQ analyzes
+↓
+Municipality responds
+↓
+Worker arrives
+↓
+Problem gets fixed
+
+This visual should be the central storytelling element.
+
+--------------------------------------------------
+HOW CVQ WORKS
+--------------------------------------------------
+
+Create a simple 6-step horizontal architecture based on the reference:
+
+01
+REPORT
+
+"Capture the problem."
+
+02
+ANALYZE
+
+"AI identifies the issue."
+
+03
+SUBMIT
+
+"Create a civic ticket."
+
+04
+ASSIGN
+
+"Route it to the right department."
+
+05
+RESOLVE
+
+"Workers take action."
+
+06
+VERIFY
+
+"Citizens confirm the fix."
+
+Use scroll-triggered animations.
+
+--------------------------------------------------
+IMPORTANT UX PRINCIPLE
+--------------------------------------------------
+
+At every point the user should know:
+
+WHAT HAPPENED?
+
+WHAT IS HAPPENING NOW?
+
+WHAT HAPPENS NEXT?
+
+For example:
+
+Report submitted
+↓
+AI analysis complete
+↓
+Assigned to Roads Department
+↓
+Worker assigned
+↓
+Repair in progress
+↓
+Awaiting your verification
+
+Make this progression extremely clear.
+
+--------------------------------------------------
+ACCESSIBILITY
+--------------------------------------------------
+
+Implement:
+
+- Keyboard navigation
+- Accessible labels
+- Good contrast
+- Focus states
+- Screen-reader-friendly forms
+- Proper button states
+- Loading states
+- Error states
+- Empty states
+
+--------------------------------------------------
+ERROR / EMPTY STATES
+--------------------------------------------------
+
+Design proper UI for:
+
+No issues
+Upload failed
+Location unavailable
+AI analysis failed
+Network error
+Issue already resolved
+Verification failed
+
+Do not simply show browser alerts.
+
+--------------------------------------------------
+OUTPUT
+--------------------------------------------------
+
+Generate production-ready code using:
+
+Next.js App Router
+TypeScript
+Tailwind CSS
+Framer Motion
+Supabase
+
+Create a clean component architecture.
+
+Suggested structure:
+
+app/
+  page.tsx
+  report/page.tsx
+  issues/page.tsx
+  issues/[id]/page.tsx
+  nearby/page.tsx
+  notifications/page.tsx
+  profile/page.tsx
+  admin/page.tsx
+
+components/
+  Navbar.tsx
+  Sidebar.tsx
+  CitizenDashboard.tsx
+  ReportForm.tsx
+  ImageUploader.tsx
+  AIAnalysis.tsx
+  TicketSuccess.tsx
+  IssueCard.tsx
+  IssueTimeline.tsx
+  VerificationPanel.tsx
+  MapView.tsx
+  NotificationCenter.tsx
+
+lib/
+  supabase.ts
+  ai.ts
+  utils.ts
+
+--------------------------------------------------
+FINAL DESIGN GOAL
+--------------------------------------------------
+
+The reference architecture should remain recognizable:
+
+CITIZEN HOME
+→ REPORT ISSUE
+→ AI ANALYSIS
+→ TICKET CREATED
+→ TRACK STATUS
+→ VERIFY & CLOSE
+
+But CVQ should look like a premium modern civic-tech product.
+
+The user journey should be extremely simple:
+
+SEE A PROBLEM
+↓
+TAKE A PHOTO
+↓
+CVQ UNDERSTANDS IT
+↓
+MUNICIPALITY TAKES ACTION
+↓
+TRACK THE PROGRESS
+↓
+VERIFY THE FIX
+
+Core message:
+
+"Your report should lead to action."
+
+
+
+1)in officers portal when we go to assigned issues when we go into actions accept and start update progress and upload resolution is not working . also add some elements in issue timeline. 
+2) in progress when we go to actions it redirects us to assigned issue. i want it to show a workflow where it describes what it is at. how estimated time to resolve. take estimate 3 days. 
+3) In resolved also it is doing same . do something with it too 
+4) add log out 
+5) in dashboard every element should be clickable and it should work too 
+6) in dashboard "My Assigned Issues" , "new" , "in progress" not working 
